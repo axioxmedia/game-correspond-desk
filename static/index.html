@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="gold">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>游戏照应台</title>
+  <link rel="icon" href="/brand/logo.png" />
+  <link rel="stylesheet" href="/assets/styles.css" />
+</head>
+<body>
+  <div class="glow glow-a"></div>
+  <div class="glow glow-b"></div>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand-lock">
+        <img src="/brand/logo.png" alt="" width="22" height="22" />
+        <div>
+          <strong data-i18n="appName">游戏照应台</strong>
+          <em data-i18n="appTag">编辑双轴照应图并导出查阅页</em>
+        </div>
+      </div>
+      <input id="projectName" class="title-input" spellcheck="false" />
+      <div class="top-actions">
+        <label class="remember">
+          <input type="checkbox" id="rememberPrefs" checked />
+          <span data-i18n="remember">记住本次选择</span>
+        </label>
+        <div class="theme-switch" id="themeSwitch" data-on="gold" role="group">
+          <span class="theme-slider" aria-hidden="true"></span>
+          <button type="button" data-theme="gold" id="themeGold"><span data-i18n="themeGold">黑金</span></button>
+          <button type="button" data-theme="light" id="themeLight"><span data-i18n="themeLight">浅色</span></button>
+        </div>
+        <div class="lang-switch" role="group">
+          <button type="button" id="langZh">中文</button>
+          <button type="button" id="langEn">EN</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="toolbar">
+      <div class="axis-switch" id="axisSwitch"></div>
+      <button type="button" class="btn ghost" id="btnAddAxis" data-i18n="addAxis">加视图轴</button>
+      <button type="button" class="btn ghost" id="btnAddCat" data-i18n="addCat">加分类</button>
+      <button type="button" class="btn ghost" id="btnAddNode" data-i18n="addNode">加节点</button>
+      <button type="button" class="btn ghost" id="btnDel" data-i18n="delete">删除</button>
+      <span class="hint" data-i18n="hintLink">从方块圆点拖到另一方块即可拉对照应线</span>
+      <span class="spacer"></span>
+      <button type="button" class="btn ghost" id="btnNew" data-i18n="newProject">新建</button>
+      <button type="button" class="btn ghost" id="btnImport" data-i18n="importJson">导入 JSON</button>
+      <input type="file" id="importFile" accept="application/json,.json" hidden />
+      <button type="button" class="btn ghost" id="btnSave" data-i18n="save">保存项目</button>
+      <button type="button" class="btn ghost" id="btnPreview" data-i18n="preview">预览查阅页</button>
+      <button type="button" class="btn primary" id="btnExport" data-i18n="export">导出 HTML</button>
+    </div>
+
+    <div class="workspace">
+      <aside class="pane pane-left">
+        <header>
+          <span data-i18n="outline">大纲</span>
+          <small id="treeMeta"></small>
+        </header>
+        <div id="treeRoot" class="tree"></div>
+      </aside>
+      <main class="pane pane-canvas">
+        <div id="canvasHost" class="canvas-host"></div>
+      </main>
+      <aside class="pane pane-right">
+        <header data-i18n="inspector">侧栏说明</header>
+        <div id="inspector" class="inspector">
+          <p class="muted" data-i18n="pickHint">点选方块或连线后在此编辑。</p>
+        </div>
+      </aside>
+    </div>
+
+    <footer class="statusbar">
+      <span class="app-version" id="appVersion">v1.0.0</span>
+      <span id="statusText" class="status-text"></span>
+      <span class="spacer"></span>
+      <span class="brand-foot">Axiox Media</span>
+    </footer>
+  </div>
+  <div class="floor"></div>
+
+  <div class="modal hide" id="modal">
+    <div class="modal-card">
+      <h3 id="modalTitle"></h3>
+      <input id="modalInput" />
+      <div class="modal-actions">
+        <button type="button" class="btn ghost" id="modalCancel" data-i18n="cancel">取消</button>
+        <button type="button" class="btn primary" id="modalOk" data-i18n="ok">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal hide" id="exportModal">
+    <div class="modal-card wide">
+      <h3 data-i18n="exportTitle">导出查阅包</h3>
+      <label class="chk-row"><input type="checkbox" id="exAutoLang" checked /> <span data-i18n="exAutoLang">按浏览器语言自动中英切换（默认开）</span></label>
+      <label class="chk-row"><input type="checkbox" id="exPreferEn" checked /> <span data-i18n="exPreferEn">无浏览器匹配时优先显示英文（默认开）</span></label>
+      <label class="field-lab" data-i18n="exDefaultAxis">默认显示的模式</label>
+      <select id="exAxis">
+        <option value="system" selected>System</option>
+        <option value="discipline">Disciplines</option>
+        <option value="mode">Modes</option>
+      </select>
+      <label class="field-lab" data-i18n="exDest">导出位置</label>
+      <div class="path-row">
+        <input id="exDest" spellcheck="false" />
+        <button type="button" class="btn ghost" id="exPick" data-i18n="exPick">选择位置</button>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn ghost" id="exCancel" data-i18n="cancel">取消</button>
+        <button type="button" class="btn primary" id="exGo" data-i18n="exGo">开始导出</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay hide" id="packOverlay">
+    <div class="overlay-box wide">
+      <div class="pack-live">
+        <div class="spin" aria-hidden="true"></div>
+        <div>
+          <h3 data-i18n="packTitle">正在导出</h3>
+          <p id="packStage">HTML zip</p>
+        </div>
+      </div>
+      <div class="progress-row">
+        <div class="progress"><i id="packBar"></i></div>
+        <span id="packPct">0%</span>
+      </div>
+      <div class="terminal in-overlay">
+        <div class="term-dots"><i></i><i></i><i></i></div>
+        <pre id="packLog"></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal hide" id="doneModal">
+    <div class="modal-card">
+      <h3 data-i18n="exportDone">导出完成</h3>
+      <p class="muted" data-i18n="exportWhere">查阅包已写到：</p>
+      <input id="donePath" readonly />
+      <div class="modal-actions">
+        <button type="button" class="btn ghost" id="doneClose" data-i18n="ok">确定</button>
+        <button type="button" class="btn primary" id="doneOpen" data-i18n="openFolder">打开文件夹</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/assets/canvas.js"></script>
+  <script src="/assets/app.js"></script>
+</body>
+</html>

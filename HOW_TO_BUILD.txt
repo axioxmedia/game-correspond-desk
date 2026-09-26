@@ -1,0 +1,16 @@
+Game Correspond Desk — build the Windows EXE
+
+1. Install Python 3.11 or 3.12 from python.org. Check "Add python.exe to PATH".
+2. Unzip this folder.
+3. Double-click build_exe.bat.
+4. Result: dist\GameCorrespondDesk.exe
+
+Alternate:
+  powershell -ExecutionPolicy Bypass -File .\build_exe.ps1
+
+Source run without packing:
+  start.bat
+
+If the windowed EXE fails to start, send dist\correspond_desk.log.
+Defender may warn on an unsigned PyInstaller binary. That is expected.
+Rebuild the EXE after every source change.
